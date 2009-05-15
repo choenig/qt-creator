@@ -347,6 +347,9 @@ public:
 
     virtual void format();
     virtual void rewrapParagraph();
+    virtual void sortBlock();
+    QTextCursor findSurroundingBlock(const QTextCursor & tc) const;
+    virtual void expandSelection();
     virtual void unCommentSelection();
 
     virtual void encourageApply();

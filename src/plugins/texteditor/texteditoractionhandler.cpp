@@ -135,6 +135,8 @@ public:
     QAction *m_printAction = nullptr;
     QAction *m_formatAction = nullptr;
     QAction *m_rewrapParagraphAction = nullptr;
+    QAction *m_sortBlockAction = nullptr;
+    QAction *m_expandSelectionAction = nullptr;
     QAction *m_visualizeWhitespaceAction = nullptr;
     QAction *m_cleanWhitespaceAction = nullptr;
     QAction *m_textWrappingAction = nullptr;
@@ -343,6 +345,14 @@ void TextEditorActionHandlerPrivate::createActions()
             QKeySequence(Core::useMacShortcuts ? tr("Meta+E, Meta+V") : tr("Ctrl+E, Ctrl+V")),
             G_EDIT_FORMAT, advancedEditMenu);
     m_visualizeWhitespaceAction->setCheckable(true);
+    m_sortBlockAction = registerAction(SORT_BLOCK,
+            [this] (TextEditorWidget *w) { w->sortBlock(); }, false, tr("Sort Block"),
+            QKeySequence(),
+            G_EDIT_FORMAT, advancedEditMenu);
+    m_expandSelectionAction = registerAction(EXPAND_SELECTION,
+            [this] (TextEditorWidget *w) { w->expandSelection(); }, false, tr("Expand Selection"),
+            QKeySequence(),
+            G_EDIT_FORMAT, advancedEditMenu);
     m_cleanWhitespaceAction = registerAction(CLEAN_WHITESPACE,
             [] (TextEditorWidget *w) { w->cleanWhitespace(); }, true, tr("Clean Whitespace"),
             QKeySequence(),
@@ -499,6 +509,7 @@ void TextEditorActionHandlerPrivate::createActions()
     m_modifyingActions << m_deleteStartOfWordCamelCaseAction;
     m_modifyingActions << m_duplicateSelectionAction;
     m_modifyingActions << m_duplicateSelectionAndCommentAction;
+    m_modifyingActions << m_expandSelectionAction;
     m_modifyingActions << m_formatAction;
     m_modifyingActions << m_indentAction;
     m_modifyingActions << m_insertLineAboveAction;
@@ -509,6 +520,7 @@ void TextEditorActionHandlerPrivate::createActions()
     m_modifyingActions << m_moveLineUpAction;
     m_modifyingActions << m_pasteAction;
     m_modifyingActions << m_rewrapParagraphAction;
+    m_modifyingActions << m_sortBlockAction;
     m_modifyingActions << m_switchUtf8bomAction;
     m_modifyingActions << m_unCommentSelectionAction;
     m_modifyingActions << m_unindentAction;

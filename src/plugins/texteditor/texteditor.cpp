@@ -7191,6 +7191,96 @@ void TextEditorWidget::rewrapParagraph()
     cursor.endEditBlock();
 }
 
+static bool caseInsensitiveLessThan(const QString & lhs, const QString & rhs)
+{
+    int cmp = lhs.compare(rhs, Qt::CaseInsensitive);
+    if (cmp != 0)
+        return cmp < 0;
+    else
+        return lhs < rhs;
+}
+
+void TextEditorWidget::sortBlock()
+{
+    QTextCursor tc = textCursor();
+
+    if (!tc.hasSelection()) {
+        tc = findSurroundingBlock(tc);
+    }
+    int endOfSelection = tc.selectionEnd();
+
+    tc.setPosition(tc.selectionStart());
+    tc.movePosition(QTextCursor::StartOfLine);
+    tc.setPosition(endOfSelection - 1, QTextCursor::KeepAnchor);
+    tc.movePosition(QTextCursor::EndOfLine, QTextCursor::KeepAnchor);
+    endOfSelection = tc.position() + 1;
+
+    // do the actual sorting
+    QStringList lines = tc.selectedText().split(QChar::ParagraphSeparator, QString::SkipEmptyParts);
+    std::sort(lines.begin(), lines.end(), caseInsensitiveLessThan);
+    QString sortedText = lines.join(QString(QChar::ParagraphSeparator));
+
+    tc.beginEditBlock();
+    tc.insertText(sortedText);
+    tc.endEditBlock();
+
+    tc.setPosition(endOfSelection);
+    setTextCursor(tc);
+}
+
+QTextCursor TextEditorWidget::findSurroundingBlock(const QTextCursor & tc) const
+{
+    const QRegExp emptyLineRE = QRegExp(QLatin1String("^\\s*$"));
+
+    QTextCursor retval = tc;
+
+    QTextBlock block = document()->findBlock(tc.selectionStart());
+    while (block.previous().isValid() && !emptyLineRE.exactMatch(block.previous().text())) {
+        block = block.previous();
+    }
+    retval.setPosition(block.position());
+
+    block = document()->findBlock(tc.selectionEnd());
+    while (block.next().isValid() && !emptyLineRE.exactMatch(block.next().text())) {
+        block = block.next();
+    }
+
+    retval.setPosition(qMin(block.position() + block.length(), document()->characterCount()-1),
+                       QTextCursor::KeepAnchor);
+    return retval;
+}
+
+void TextEditorWidget::expandSelection()
+{
+    QTextCursor tc = textCursor();
+
+    // select current word if there is no selection yet
+    if (!tc.hasSelection()) {
+        tc.select(QTextCursor::WordUnderCursor);
+        if (tc.hasSelection()) {
+            setTextCursor(tc);
+            return;
+        }
+    }
+
+    // select the current line if selectionStart and selectionEnd are on the same line
+    // and not the whole line is selected yet
+    QTextBlock block = tc.block();
+    if (block.contains(tc.selectionStart()) && block.contains(tc.selectionEnd())
+        && block.text() != tc.selectedText())
+    {
+        tc.select(QTextCursor::LineUnderCursor);
+        if (tc.hasSelection()) {
+            setTextCursor(tc);
+            return;
+        }
+    }
+
+    // finally select the whole block surrounded by empy lines
+    tc = findSurroundingBlock(tc);
+    setTextCursor(tc);
+}
+
 void TextEditorWidget::unCommentSelection()
 {
     Utils::unCommentSelection(this, d->m_commentDefinition);
