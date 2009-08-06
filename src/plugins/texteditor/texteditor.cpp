@@ -7281,6 +7281,57 @@ void TextEditorWidget::expandSelection()
     setTextCursor(tc);
 }
 
+void TextEditorWidget::convertToCamelCase()
+{
+    QTextCursor tc = textCursor();
+
+    if (!tc.hasSelection()) {
+        tc.select(QTextCursor::WordUnderCursor);
+    }
+
+    const int start = tc.selectionStart();
+    const int end   = tc.selectionEnd();
+
+    QString camelCase;
+    int pos = start;
+    while (pos < end)
+    {
+        // special handling for spaces
+        if (document()->characterAt(pos).isSpace()) {
+            camelCase += document()->characterAt(pos++);
+            continue;
+        }
+
+        // select the current word ...
+        tc.setPosition(pos);
+        tc.movePosition(QTextCursor::EndOfWord, QTextCursor::KeepAnchor);
+
+        // ... and do the conversion
+        const QString crank_case = tc.selectedText();
+        const int len = crank_case.length();
+        for (int i = 0; i < len; ++i)
+        {
+            if (((i == 1 && crank_case[i-1] != QLatin1Char('m')) || (1 < i && i < len - 1))
+                && crank_case[i] == QLatin1Char('_') && crank_case[i+1].isLetter())
+            {
+                camelCase += crank_case[++i].toUpper(); // convert _[a-z] to _[A-Z]
+            } else {
+                camelCase += crank_case[i];
+            }
+        }
+
+        // then proceed to the next word
+        pos = tc.selectionEnd();
+    }
+
+    // replace the text by the converted
+    tc.beginEditBlock();
+    tc.setPosition(start);
+    tc.setPosition(end, QTextCursor::KeepAnchor);
+    tc.insertText(camelCase);
+    tc.endEditBlock();
+}
+
 void TextEditorWidget::unCommentSelection()
 {
     Utils::unCommentSelection(this, d->m_commentDefinition);

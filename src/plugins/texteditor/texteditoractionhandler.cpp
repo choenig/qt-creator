@@ -137,6 +137,7 @@ public:
     QAction *m_rewrapParagraphAction = nullptr;
     QAction *m_sortBlockAction = nullptr;
     QAction *m_expandSelectionAction = nullptr;
+    QAction *m_convertToCamelCaseAction = nullptr;
     QAction *m_visualizeWhitespaceAction = nullptr;
     QAction *m_cleanWhitespaceAction = nullptr;
     QAction *m_textWrappingAction = nullptr;
@@ -353,6 +354,10 @@ void TextEditorActionHandlerPrivate::createActions()
             [this] (TextEditorWidget *w) { w->expandSelection(); }, false, tr("Expand Selection"),
             QKeySequence(),
             G_EDIT_FORMAT, advancedEditMenu);
+    m_convertToCamelCaseAction = registerAction(CONVERT_TO_CAMELCASE,
+            [this] (TextEditorWidget *w) { w->convertToCamelCase(); }, false, tr("Convert to CamelCase"),
+            QKeySequence(),
+            G_EDIT_FORMAT, advancedEditMenu);
     m_cleanWhitespaceAction = registerAction(CLEAN_WHITESPACE,
             [] (TextEditorWidget *w) { w->cleanWhitespace(); }, true, tr("Clean Whitespace"),
             QKeySequence(),
@@ -497,6 +502,7 @@ void TextEditorActionHandlerPrivate::createActions()
     // and disable them
     m_modifyingActions << m_circularPasteAction;
     m_modifyingActions << m_cleanWhitespaceAction;
+    m_modifyingActions << m_convertToCamelCaseAction;
     m_modifyingActions << m_copyLineDownAction;
     m_modifyingActions << m_copyLineUpAction;
     m_modifyingActions << m_cutLineAction;
