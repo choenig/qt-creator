@@ -139,6 +139,7 @@ public:
     QAction *m_expandSelectionAction = nullptr;
     QAction *m_convertToCamelCaseAction = nullptr;
     QAction *m_alignIndentAction = nullptr;
+    QAction *m_pasteAndCopyAction = nullptr;
     QAction *m_visualizeWhitespaceAction = nullptr;
     QAction *m_cleanWhitespaceAction = nullptr;
     QAction *m_textWrappingAction = nullptr;
@@ -363,6 +364,10 @@ void TextEditorActionHandlerPrivate::createActions()
             [this] (TextEditorWidget *w) { w->alignIndent(); }, false, tr("Align Indentation"),
             QKeySequence(),
             G_EDIT_FORMAT, advancedEditMenu);
+    m_pasteAndCopyAction = registerAction(PASTE_AND_COPY,
+            [this] (TextEditorWidget *w) { w->pasteAndCopy(); }, false, tr("Paste and Copy"),
+            QKeySequence(),
+            G_EDIT_FORMAT, advancedEditMenu);
     m_cleanWhitespaceAction = registerAction(CLEAN_WHITESPACE,
             [] (TextEditorWidget *w) { w->cleanWhitespace(); }, true, tr("Clean Whitespace"),
             QKeySequence(),
@@ -531,6 +536,7 @@ void TextEditorActionHandlerPrivate::createActions()
     m_modifyingActions << m_moveLineDownAction;
     m_modifyingActions << m_moveLineUpAction;
     m_modifyingActions << m_pasteAction;
+    m_modifyingActions << m_pasteAndCopyAction;
     m_modifyingActions << m_rewrapParagraphAction;
     m_modifyingActions << m_sortBlockAction;
     m_modifyingActions << m_switchUtf8bomAction;

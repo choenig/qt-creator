@@ -7441,6 +7441,20 @@ void TextEditorWidget::alignIndent()
     tc.endEditBlock();
 }
 
+void TextEditorWidget::pasteAndCopy()
+{
+    QTextCursor tc = textCursor();
+    if (!tc.hasSelection()) return;
+
+    QString fromClipboard = QApplication::clipboard()->text();
+    if (fromClipboard.isEmpty()) return;
+
+    QString selectedText = tc.selectedText();
+    tc.insertText(fromClipboard);
+
+    QApplication::clipboard()->setText(selectedText);
+}
+
 void TextEditorWidget::unCommentSelection()
 {
     Utils::unCommentSelection(this, d->m_commentDefinition);

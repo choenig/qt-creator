@@ -352,6 +352,7 @@ public:
     virtual void expandSelection();
     virtual void convertToCamelCase();
     virtual void alignIndent();
+    virtual void pasteAndCopy();
     virtual void unCommentSelection();
 
     virtual void encourageApply();
