@@ -2096,6 +2096,89 @@ void RearrangeParamDeclarationList::match(const CppQuickFixInterface &interface,
 
 namespace {
 
+class AddRemoveExclamationOp: public CppQuickFixOperation
+{
+public:
+    enum Type {
+        AddExclamation,
+        RemoveExclamation
+    };
+
+public:
+    AddRemoveExclamationOp(const CppQuickFixInterface &interface, int priority, Type type, int position)
+        : CppQuickFixOperation(interface), type(type), position(position)
+    {
+        if (type == AddExclamation)
+            setDescription(QApplication::translate("CppTools::QuickFix",
+                                                   "Add ! to statement"));
+        else
+            setDescription(QApplication::translate("CppTools::QuickFix",
+                                                   "Remove ! from statement"));
+    }
+
+    virtual void perform()
+    {
+        CppRefactoringChanges refactoring(snapshot());
+        CppRefactoringFilePtr currentFile = refactoring.file(fileName());
+
+        ChangeSet changes;
+
+        if (type == AddExclamation)
+            changes.insert(position, QLatin1String("!"));
+        else
+            changes.remove(position-1, position);
+
+        currentFile->setChangeSet(changes);
+        currentFile->apply();
+    }
+
+private:
+    const Type type;
+    const int position;
+};
+
+} // anonymous namespace
+
+void AddRemoveExclamation::match(const CppQuickFixInterface & interface, QuickFixOperations & result)
+{
+    const QList<AST *> &path = interface.path();
+
+    if (path.isEmpty() || path.last()->asBinaryExpression())
+        return;
+
+    int indexOfExpression = -1;
+    for (int index = path.size() - 1; index != -1; --index) {
+        AST *node = path.at(index);
+        if (node->asExpression()) {
+            indexOfExpression = index;
+            break;
+        }
+    }
+
+    if (indexOfExpression == -1)
+        return;
+
+    int parentIndex = indexOfExpression - 1;
+    AST *parentNode = path.at(parentIndex);
+    CallAST * callAst = 0;
+    while (parentNode->asMemberAccess() ||
+           ((callAst = parentNode->asCall()) && callAst->base_expression == path.at(parentIndex + 1)))
+        parentNode = path.at(--parentIndex);
+
+    UnaryExpressionAST * unaryType = parentNode->asUnaryExpression();
+    bool isNegation = unaryType && interface.currentFile()->tokenAt(unaryType->unary_op_token).is(T_EXCLAIM);
+
+    AST *node = path.at(indexOfExpression);
+    int startPos = interface.currentFile()->startOf(node);
+
+    result += CppQuickFixOperation::Ptr(new AddRemoveExclamationOp(interface, indexOfExpression,
+                                                                   isNegation ? AddRemoveExclamationOp::RemoveExclamation
+                                                                              : AddRemoveExclamationOp::AddExclamation,
+                                                                   startPos));
+}
+
+namespace {
+
 class ReformatPointerDeclarationOp: public CppQuickFixOperation
 {
 public:
@@ -6054,6 +6137,7 @@ void createCppQuickFixes()
     new AddLocalDeclaration;
     new AddBracesToIf;
     new RearrangeParamDeclarationList;
+	new AddRemoveExclamation;
     new ReformatPointerDeclaration;
 
     new CompleteSwitchCaseStatement;

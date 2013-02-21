@@ -336,6 +336,17 @@ public:
 };
 
 /*!
+ * Adds or removes an '!' for current expression
+ *
+ * Activates on: ...
+ */
+class AddRemoveExclamation: public CppQuickFixFactory
+{
+public:
+    virtual void match(const CppQuickFixInterface & interface, QuickFixOperations & result);
+};
+
+/*!
   Reformats a pointer, reference or rvalue reference type/declaration.
 
   Works also with selections (except when the cursor is not on any AST).
