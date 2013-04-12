@@ -1842,6 +1842,9 @@ void TextEditorWidget::insertLineAbove()
 {
     QTextCursor cursor = textCursor();
     cursor.beginEditBlock();
+    if (cursor.hasSelection()) {
+        cursor.setPosition(cursor.selectionStart(), QTextCursor::MoveAnchor);
+    }
     // If the cursor is at the beginning of the document,
     // it should still insert a line above the current line.
     cursor.movePosition(QTextCursor::StartOfBlock, QTextCursor::MoveAnchor);
@@ -1858,6 +1861,9 @@ void TextEditorWidget::insertLineBelow()
         d->disableBlockSelection(TextEditorWidgetPrivate::NoCursorUpdate);
     QTextCursor cursor = textCursor();
     cursor.beginEditBlock();
+    if (cursor.hasSelection()) {
+        cursor.setPosition(cursor.selectionEnd()-1, QTextCursor::MoveAnchor);
+    }
     cursor.movePosition(QTextCursor::EndOfBlock, QTextCursor::MoveAnchor);
     cursor.insertBlock();
     d->m_document->autoIndent(cursor);
