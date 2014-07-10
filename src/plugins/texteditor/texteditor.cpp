@@ -7332,6 +7332,109 @@ void TextEditorWidget::convertToCamelCase()
     tc.endEditBlock();
 }
 
+bool TESTING_ONLY()
+{
+	 // TEST // Test // TEST
+	QString test1 = QLatin1String("test1"); // first test
+
+
+    QString test1999 = QLatin1String("test1999"); // second test
+    QString no = QLatin1String("no");
+    QString test 	= QLatin1String("//test"); // last test // in line
+    // TEST  // TEST
+
+    int aaa1=0,bbbbbbbbb1=0,cccccccc1=0,eeeeeeeee1=0,xxxxxxxxxxxxxxxx1=0,yyyyyyyy1=0,zzzzzzzzzzz1=0;
+    int aaa2=0,bbbbbbbbb2=0,cccccccc2=0,eeeeeeeee2=0,xxxxxxxxxxxxxxxx2=0,yyyyyyyy2=0,zzzzzzzzzzz2=0;
+    return aaa1 == aaa2 &&
+            bbbbbbbbb1 == bbbbbbbbb2 &&
+            cccccccc1 == cccccccc2 &&
+            eeeeeeeee1 == eeeeeeeee2                 &&
+            xxxxxxxxxxxxxxxx1 == xxxxxxxxxxxxxxxx2 &&
+            yyyyyyyy1 == yyyyyyyy2 &&
+            zzzzzzzzzzz1 == zzzzzzzzzzz2;
+}
+
+void TextEditorWidget::alignIndent()
+{
+    QTextCursor tc = textCursor();
+    if (!tc.hasSelection()) return;
+
+    // remember initial selection
+    const int start = tc.selectionStart();
+    const int end   = tc.selectionEnd();
+
+    // select the complete block
+    tc.setPosition(start);
+    tc.movePosition(QTextCursor::StartOfBlock);
+    tc.setPosition(end, QTextCursor::KeepAnchor);
+    tc.movePosition(QTextCursor::EndOfBlock, QTextCursor::KeepAnchor);
+
+    const QString selectedTxt = tc.selectedText();
+    QStringList lines = selectedTxt.split(QChar::ParagraphSeparator, QString::KeepEmptyParts);
+    if (lines.size() < 2) return;
+
+    // try to find the string to align by matching start of selection with end of selection
+    QString aligner;
+    bool alignOnLast = true;
+    {
+        const QString a = lines.first().mid(start - tc.selectionStart());
+        const QString b = lines.last().left(lines.last().length() - (tc.selectionEnd() - end));
+
+        for (int i = qMin(a.length(), b.length()) ; i > 0 ; --i) {
+            if (a.leftRef(i).compare(b.rightRef(i)) == 0) {
+                aligner = a.left(i);
+                break;
+            }
+        }
+
+        if (aligner.isNull())
+            return;
+
+        // try to guess if we align the first or the last occurence of aligner in every line
+        {
+            bool aHasFollowing = a.lastIndexOf(aligner) > 0;
+            bool bHasPrevious  = b.indexOf(aligner) < b.length() - aligner.length();
+
+            if (aHasFollowing && !bHasPrevious)
+                alignOnLast = false;
+        }
+    }
+
+    const TabSettings & ts = d->m_document->tabSettings();
+
+    // now find the max indentation depth
+    int depthToIndent = 0;
+    for (int i = 0 ; i < lines.size(); ++i) {
+        QString & line = lines[i];
+        int pos = (alignOnLast ? line.lastIndexOf(aligner) : line.indexOf(aligner));
+
+        // remove spaces before aligner
+        int len = 0;
+        for ( ; pos > 0 && line.at(pos-1).isSpace() ; --pos, ++len ) ;
+        line.remove(pos, len);
+
+        // re-add a single space
+        line.insert(pos++, QLatin1Char(' '));
+
+        depthToIndent = qMax(depthToIndent, ts.columnAt(line, pos));
+    }
+
+    // now indent all lines
+    for (int i = 0 ; i < lines.size(); ++i) {
+        QString & line = lines[i];
+        const int pos = (alignOnLast ? line.lastIndexOf(aligner) : line.indexOf(aligner));
+        if (pos >= 0) {
+            const int diff = depthToIndent - ts.columnAt(line, pos);
+            if (diff > 0)
+                line.insert(pos, QString(diff, QLatin1Char(' ')));
+        }
+    }
+
+    tc.beginEditBlock();
+    tc.insertText(lines.join(QString(QChar::ParagraphSeparator)));
+    tc.endEditBlock();
+}
+
 void TextEditorWidget::unCommentSelection()
 {
     Utils::unCommentSelection(this, d->m_commentDefinition);

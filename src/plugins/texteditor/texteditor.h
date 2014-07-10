@@ -351,6 +351,7 @@ public:
     QTextCursor findSurroundingBlock(const QTextCursor & tc) const;
     virtual void expandSelection();
     virtual void convertToCamelCase();
+    virtual void alignIndent();
     virtual void unCommentSelection();
 
     virtual void encourageApply();

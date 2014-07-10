@@ -133,6 +133,7 @@ const char AUTO_INDENT_SELECTION[] = "TextEditor.AutoIndentSelection";
 const char SORT_BLOCK[]            = "TextEditor.SortBlock";
 const char EXPAND_SELECTION[]      = "TextEditor.ExpandSelection";
 const char CONVERT_TO_CAMELCASE[]  = "TextEditor.ConvertToCamelCase";
+const char ALIGN_INDENTATION[]     = "TextEditor.AlignIndentation";
 const char INCREASE_FONT_SIZE[]    = "TextEditor.IncreaseFontSize";
 const char DECREASE_FONT_SIZE[]    = "TextEditor.DecreaseFontSize";
 const char RESET_FONT_SIZE[]       = "TextEditor.ResetFontSize";
