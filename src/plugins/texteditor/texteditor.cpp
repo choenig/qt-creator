@@ -7256,6 +7256,32 @@ QTextCursor TextEditorWidget::findSurroundingBlock(const QTextCursor & tc) const
     return retval;
 }
 
+void TextEditorWidget::moveSelection()
+{
+    QTextCursor tc = textCursor();
+
+    if (!tc.hasSelection()) {
+        tc.select(QTextCursor::LineUnderCursor);
+        tc.movePosition(QTextCursor::Right, QTextCursor::KeepAnchor); // 'hack' to select the newline
+    }
+
+    const QString text = tc.selectedText();
+    tc.removeSelectedText();
+
+    tc = findSurroundingBlock(tc);
+
+    const int startOfSelection = tc.selectionStart();
+
+    tc.setPosition(startOfSelection, QTextCursor::MoveAnchor);
+
+    tc.beginEditBlock();
+    tc.insertText(text);
+    tc.endEditBlock();
+
+    tc.setPosition(startOfSelection);
+    setTextCursor(tc);
+}
+
 void TextEditorWidget::expandSelection()
 {
     QTextCursor tc = textCursor();

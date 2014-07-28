@@ -135,6 +135,7 @@ public:
     QAction *m_printAction = nullptr;
     QAction *m_formatAction = nullptr;
     QAction *m_rewrapParagraphAction = nullptr;
+    QAction *m_moveLinesAction = nullptr;
     QAction *m_sortBlockAction = nullptr;
     QAction *m_expandSelectionAction = nullptr;
     QAction *m_convertToCamelCaseAction = nullptr;
@@ -368,6 +369,10 @@ void TextEditorActionHandlerPrivate::createActions()
             [this] (TextEditorWidget *w) { w->pasteAndCopy(); }, false, tr("Paste and Copy"),
             QKeySequence(),
             G_EDIT_FORMAT, advancedEditMenu);
+    m_moveLinesAction = registerAction(MOVE_SELECTED_LINES,
+           [this] (TextEditorWidget *w) { w->moveSelection(); }, false, tr("Move Lines"),
+           QKeySequence(),
+           G_EDIT_FORMAT, advancedEditMenu);
     m_cleanWhitespaceAction = registerAction(CLEAN_WHITESPACE,
             [] (TextEditorWidget *w) { w->cleanWhitespace(); }, true, tr("Clean Whitespace"),
             QKeySequence(),
@@ -535,6 +540,7 @@ void TextEditorActionHandlerPrivate::createActions()
     m_modifyingActions << m_lowerCaseSelectionAction;
     m_modifyingActions << m_moveLineDownAction;
     m_modifyingActions << m_moveLineUpAction;
+    m_modifyingActions << m_moveLinesAction;
     m_modifyingActions << m_pasteAction;
     m_modifyingActions << m_pasteAndCopyAction;
     m_modifyingActions << m_rewrapParagraphAction;

@@ -349,6 +349,7 @@ public:
     virtual void rewrapParagraph();
     virtual void sortBlock();
     QTextCursor findSurroundingBlock(const QTextCursor & tc) const;
+    virtual void moveSelection();
     virtual void expandSelection();
     virtual void convertToCamelCase();
     virtual void alignIndent();

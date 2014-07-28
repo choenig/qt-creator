@@ -131,6 +131,7 @@ const char UNFOLD[]                = "TextEditor.Unfold";
 const char UNFOLD_ALL[]            = "TextEditor.UnFoldAll";
 const char AUTO_INDENT_SELECTION[] = "TextEditor.AutoIndentSelection";
 const char SORT_BLOCK[]            = "TextEditor.SortBlock";
+const char MOVE_SELECTED_LINES[]   = "TextEditor.MoveSelectedLines";
 const char EXPAND_SELECTION[]      = "TextEditor.ExpandSelection";
 const char CONVERT_TO_CAMELCASE[]  = "TextEditor.ConvertToCamelCase";
 const char ALIGN_INDENTATION[]     = "TextEditor.AlignIndentation";
